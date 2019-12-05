@@ -72,12 +72,12 @@ class Ui_MainWindow(object):
         self.X_edit = QtWidgets.QLineEdit(self.Dimensions)
         self.X_edit.setGeometry(QtCore.QRect(20, 40, 51, 20))
         self.X_edit.setObjectName("X_edit")
-        self.X_edit.setText('100')
+        self.X_edit.setText('5')
 
         self.Y_edit = QtWidgets.QLineEdit(self.Dimensions)
         self.Y_edit.setGeometry(QtCore.QRect(20, 70, 51, 20))
         self.Y_edit.setObjectName("Y_edit")
-        self.Y_edit.setText('100')
+        self.Y_edit.setText('5')
 
         self.X = QtWidgets.QLabel(self.Dimensions)
         self.X.setGeometry(QtCore.QRect(10, 40, 16, 16))
@@ -103,7 +103,7 @@ class Ui_MainWindow(object):
         self.Seeds_edit = QtWidgets.QLineEdit(self.frame)
         self.Seeds_edit.setGeometry(QtCore.QRect(10, 30, 51, 20))
         self.Seeds_edit.setObjectName("Seeds_edit")
-        self.Seeds_edit.setText('30')
+        self.Seeds_edit.setText('3')
 
         self.frame_2 = QtWidgets.QFrame(self.centralwidget)
         self.frame_2.setGeometry(QtCore.QRect(130, 510, 181, 161))
@@ -120,8 +120,10 @@ class Ui_MainWindow(object):
         self.comboBox.setObjectName("comboBox")
         self.comboBox.addItem("Moore")
         self.comboBox.addItem("Von Neumann")
-        self.comboBox.addItem("Hexagonal")
-        self.comboBox.addItem("Pentagonal")
+        self.comboBox.addItem("Hexagonal left")
+        self.comboBox.addItem("Hexagonal right")
+        self.comboBox.addItem("Pentagonal left")
+        self.comboBox.addItem("Pentagonal right")
 
         self.Inclusions = QtWidgets.QLabel(self.frame_2)
         self.Inclusions.setGeometry(QtCore.QRect(10, 80, 61, 16))
@@ -191,8 +193,10 @@ class Ui_MainWindow(object):
         self.Method.setText(_translate("MainWindow", "Method"))
         self.comboBox.setItemText(0, _translate("MainWindow", "MOORE"))
         self.comboBox.setItemText(1, _translate("MainWindow", "VON NEUMANN"))
-        self.comboBox.setItemText(2, _translate("MainWindow", "HEXAGONAL"))
-        self.comboBox.setItemText(3, _translate("MainWindow", "PENTAGONAL"))
+        self.comboBox.setItemText(2, _translate("MainWindow", "HEXAGONAL LEFT"))
+        self.comboBox.setItemText(3, _translate("MainWindow", "HEXAGONAL RIGHT"))
+        self.comboBox.setItemText(4, _translate("MainWindow", "PENTAGONAL LEFT"))
+        self.comboBox.setItemText(5, _translate("MainWindow", "PENTAGONAL RIGHT"))
         self.Inclusions.setText(_translate("MainWindow", "Inclusions"))
         self.Min.setText(_translate("MainWindow", "Min"))
         self.Max.setText(_translate("MainWindow", "Max"))
@@ -212,7 +216,9 @@ class Ui_MainWindow(object):
             self.timer.stop()
 
     def playstep(self):
-        self.board.iteration()
+        empty=self.board.iteration()
+        if(empty==0):
+            self.timer.stop()
         self.refresh()
 
     def reset(self):
@@ -231,7 +237,14 @@ class Ui_MainWindow(object):
             return MOORE_NEIGHBOURHOOD
         elif "VON NEUMANN" == temp:
             return VONNEUMANN_NEIGHBOURHOOD
-
+        elif "HEXAGONAL LEFT" == temp:
+            return HEXAGONAL_LEFT
+        elif "HEXAGONAL RIGHT" == temp:
+            return HEXAGONAL_RIGHT
+        elif "PENTAGONAL LEFT" == temp:
+            return PENTAGONAL_LEFT
+        elif "PENTAGONAL RIGHT" == temp:
+            return PENTAGONAL_RIGHT
 
     def generate(self):
         nrOfSeeds=self.Seeds_edit.text()
@@ -257,6 +270,5 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
-
 
 #

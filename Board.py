@@ -12,6 +12,14 @@ MOORE_NEIGHBOURHOOD = [(-1,-1), (0,-1),  (+1,-1),
 VONNEUMANN_NEIGHBOURHOOD = [(0, -1),
                              (-1, 0),(0,0), (+1, 0),
                              (0, +1)]
+HEXAGONAL_LEFT = [(-1,-1), (-1,0), (0,-1),(0,0), (0,1),(1,0),(1,1)]
+HEXAGONAL_RIGHT = [(-1,0),(-1,1),(0,-1),(0,0),(0,1),(1,-1),(1,0)]
+PENTAGONAL_LEFT = [(-1,-1), (0,-1),
+                       (-1,0),(0,0),
+                       (-1,+1), (0,+1)]
+PENTAGONAL_RIGHT = [ (0,-1),  (+1,-1),
+                    (0,0),  (+1,0),
+                     (0,+1),  (+1,+1)]
 
 colour_rule = {
     # Syntax is - cell value: (R, G, B)
@@ -31,7 +39,7 @@ class Board(Cell):
         self.generate()
         self.generateSeeds(nrOfSeeds)
         self.neighborhood=neighborhood
-        self.boarder=True
+        self.boarder=False
 
 
     def getCell(self,row,col):
@@ -51,8 +59,8 @@ class Board(Cell):
     def generateSeeds(self,nrOfSeeds):
         generateColorRule(nrOfSeeds)
         for s in range(1,nrOfSeeds+1):
-            row=random.randrange(1,self.dimX-1,1,int)
-            col=random.randrange(1,self.dimY-1,1,int)
+            row=random.randrange(0,self.dimX,1,int)
+            col=random.randrange(0,self.dimY,1,int)
             ID=s
             colour=colour_rule[ID]
             self.setCell(row,col,ID,ID,colour)
@@ -60,8 +68,8 @@ class Board(Cell):
 
     def iteration(self):
         empty_cell=0
-        for i in range(1,self.dimX-1):
-            for j in range(1,self.dimY-1):
+        for i in range(0,self.dimX):
+            for j in range(0,self.dimY):
                 if(self.getCell(i,j).getID()):
                     self.evolveCell(i,j)
                 else:
@@ -79,31 +87,38 @@ class Board(Cell):
     def getNeighbors(self,row,col):
         IDList = []
         for rule in self.neighborhood:
-            IDList.append(self.getCell(row+rule[0],col+rule[1]).getID())
+            nei_row = (row + rule[0])
+            nei_col = (col + rule[1])
 
-        # for rule in self.neighborhood:  # for every single neibourhood cell
-        #     nei_width = (row + rule[0])
-        #     nei_hight = (col + rule[1])
-        #     flag_sb_in_range = 1
-        #     if self.boarder is True:
-        #         if nei_width < 0 or nei_width >= self.dimX or nei_hight < 0 or nei_hight >= self.dimY:
-        #             flag_sb_in_range = 0
-        #     else:  # acts like torus when analyzed cell is out of the matrix
-        #         nei_width = nei_width % self.dimX
-        #         nei_hight = nei_hight % self.dimY
-        #
-        #
-        #     if flag_sb_in_range == 0:
-        #         IDList.append(0)
-        #     else:
-        #         IDList.append(self.board[nei_width][nei_hight].ID)
+            if self.boarder is True:
+                if nei_row < 0 or nei_row >= self.dimX or nei_col < 0 or nei_col >= self.dimY:
+                    IDList.append(0)
+                    continue
+            else:
+                if nei_row < 0 or nei_row >= self.dimX or nei_col < 0 or nei_col >= self.dimY:
+                    nei_row = nei_row % self.dimX
+                    nei_col = nei_col % self.dimY
+
+            IDList.append(self.board[nei_row][nei_col].ID)
+
         ID = self.calculateID(IDList,self.getCell(row,col).getID())
         return ID
 
     def setNeighbors(self,row,col,ID):
         for rule in self.neighborhood:
-            if(self.getCell(row+rule[0],col+rule[1]).getID()==0):
-                self.setCellNextState(row+rule[0],col+rule[1],ID)
+            nei_row = (row + rule[0])
+            nei_col = (col + rule[1])
+
+            if self.boarder is True:
+                if nei_row < 0 or nei_row >= self.dimX or nei_col < 0 or nei_col >= self.dimY:
+                   continue
+            else:
+                if nei_row < 0 or nei_row >= self.dimX or nei_col < 0 or nei_col >= self.dimY:
+                    nei_row = nei_row % self.dimX
+                    nei_col = nei_col % self.dimY
+
+            if(self.getCell(nei_row,nei_col).getID()==0):
+                self.setCellNextState(nei_row,nei_col,ID)
 
     def calculateID(self,IDList,cellID):
         NO_CELL = 0
