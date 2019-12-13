@@ -1,11 +1,11 @@
 from Cell import *
-import random
 import math
 from csv import reader,writer,excel
 from numpy import array, loadtxt
 from PIL import Image
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
+from Curvature import *
 
 MOORE_NEIGHBOURHOOD = [(-1,-1), (0,-1),  (+1,-1),
                        (-1,0),(0,0),  (+1,0),
@@ -30,7 +30,7 @@ colour_rule = {
     }
 
 def generateColorRule(nrOfColours):
-    for key in range(2,nrOfColours+1):
+    for key in range(2,nrOfColours+2):
         colour_rule[key]=(random.randrange(0,255,1,int),random.randrange(0,255,1,int),random.randrange(0,255,1,int))
 
 
@@ -44,7 +44,8 @@ class Board(Cell):
         self.minR=radius[0]
         self.maxR=radius[1]
         self.nrOfInclusions=nrOfInclusions
-
+        self.curvature=False
+        self.probability=100
         self.generate()
         self.generateSeeds(nrOfSeeds)
         if(self.nrOfInclusions>0):
@@ -57,6 +58,11 @@ class Board(Cell):
 
     def setCell(self,row,col,ID,nextID,colour):
         self.board[row][col]=Cell(row,col,ID,nextID,colour)
+
+    def setCurvature(self,curvature,probability):
+        self.curvature=curvature
+        self.probability=probability
+
 
     def setCellNextState(self,row,col,ID):
         self.board[row][col].setNextID(ID)
@@ -78,9 +84,10 @@ class Board(Cell):
                     if math.sqrt((cx - x) ** 2 + (cy - y) ** 2) <= r:
                         self.setCell(x,y,1,1,colour_rule[1])
 
+
     def generateSeeds(self,nrOfSeeds):
         generateColorRule(nrOfSeeds)
-        for s in range(2,nrOfSeeds+1):
+        for s in range(2,nrOfSeeds+2):
             row=random.randrange(0,self.dimX,1,int)
             col=random.randrange(0,self.dimY,1,int)
             ID=s
@@ -122,11 +129,26 @@ class Board(Cell):
                     nei_row = nei_row % self.dimX
                     nei_col = nei_col % self.dimY
 
-            if(self.board[nei_row][nei_col].ID!=1):
-                IDList.append(self.board[nei_row][nei_col].ID)
+            # if(self.board[nei_row][nei_col].ID!=1):
+            IDList.append(self.board[nei_row][nei_col].ID)
 
-
-        ID = self.calculateID(IDList,self.getCell(row,col).getID())
+        if(self.curvature==True):
+            if(Rule1(IDList)):
+                ID=self.board[row][col].ID
+                print("RULE 1")
+            elif(Rule2(IDList)):
+                ID=self.board[row][col].ID
+                print("RULE 2")
+            elif(Rule3(IDList)):
+                ID=self.board[row][col].ID
+                print("RULE 3")
+            elif(Rule4(IDList,self.probability)):
+                ID=Rule4(IDList,self.probability)
+                print("RULE 4")
+            else:
+                ID=0
+        else:
+            ID=calculateID(IDList,self.board[row][col].ID)
         return ID
 
     def setNeighbors(self,row,col,ID):
@@ -143,23 +165,9 @@ class Board(Cell):
                     nei_col = nei_col % self.dimY
 
             if(self.getCell(nei_row,nei_col).getID()==0):
-                self.setCellNextState(nei_row,nei_col,ID)
+                if(ID and ID!=1):
+                    self.setCellNextState(nei_row,nei_col,ID)
 
-    def calculateID(self,IDList,cellID):
-        NO_CELL = 0
-        set_id = 0
-        most_frequent = 0
-        unique_vals = set(IDList)
-        if len(IDList) > 0:
-            for val in unique_vals:
-                if val != NO_CELL:
-                    frequence = IDList.count(val)
-                    if frequence == most_frequent:
-                        set_id = cellID
-                    elif frequence > most_frequent:
-                        most_frequent = frequence
-                        set_id = val
-        return set_id
 
     def evolveCell(self,row,col):
         ID=self.getNeighbors(row,col)
@@ -191,7 +199,9 @@ class Board(Cell):
     def importFromCSV(self):
         Tk().withdraw()
         filename = askopenfilename()
-        print("filename:", filename)
+        if(filename is ''):
+            return
+
         with open(filename, mode='r') as csv_file:
             csv_reader = reader(csv_file, dialect=excel)
             result=[]

@@ -172,6 +172,24 @@ class Ui_MainWindow(object):
         self.Export.setObjectName("Export")
         self.Export.clicked.connect(self.exportCSV)
 
+        self.frame_4 = QtWidgets.QFrame(self.centralwidget)
+        self.frame_4.setGeometry(QtCore.QRect(310, 550, 211, 61))
+        self.frame_4.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_4.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_4.setObjectName("frame_4")
+
+        self.Probability_edit = QtWidgets.QLineEdit(self.frame_4)
+        self.Probability_edit.setGeometry(QtCore.QRect(70, 0, 51, 20))
+        self.Probability_edit.setObjectName("Probability_edit")
+        self.Probability = QtWidgets.QLabel(self.frame_4)
+        self.Probability.setGeometry(QtCore.QRect(10, 0, 61, 21))
+        self.Probability.setObjectName("Probability")
+
+        self.GBC = QtWidgets.QCheckBox(self.frame_4)
+        self.GBC.setGeometry(QtCore.QRect(10, 30, 70, 17))
+        self.GBC.setObjectName("checkBox")
+        self.GBC.stateChanged.connect(self.GBCstate)
+
         self.timer=QTimer()
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.playstep)
@@ -211,6 +229,9 @@ class Ui_MainWindow(object):
         self.comboBox.setItemText(3, _translate("MainWindow", "HEXAGONAL RIGHT"))
         self.comboBox.setItemText(4, _translate("MainWindow", "PENTAGONAL LEFT"))
         self.comboBox.setItemText(5, _translate("MainWindow", "PENTAGONAL RIGHT"))
+        self.GBC.setText(_translate("MainWindow", "GBC"))
+        self.Probability.setText(_translate("MainWindow", "Probability"))
+
 
         self.Inclusions.setText(_translate("MainWindow", "Inclusions - radius"))
         self.Min_edit.setText(_translate("MainWindow", "1"))
@@ -279,6 +300,11 @@ class Ui_MainWindow(object):
             border=False
 
         self.board=Board(int(X),int(Y),int(nrOfSeeds),Neighborhood,border,(int(min_r_incl),int(max_r_incl)),int(nrOfInclusions))
+        if(self.GBC.isChecked()):
+            self.board.setCurvature(True, int(self.Probability_edit.text()))
+        else:
+            self.board.setCurvature(False, 0)
+
         self.refresh()
         # self.reset()
 
@@ -292,6 +318,14 @@ class Ui_MainWindow(object):
     def refresh(self):
         self.board.updateBoard()
         self.Image.setPixmap(QtGui.QPixmap("CA_img.png"))
+
+    def GBCstate(self):
+        if(self.GBC.isChecked()):
+            self.comboBox.setCurrentText("MOORE")
+            self.comboBox.setEnabled(False)
+        else:
+            self.comboBox.setEnabled(True)
+
 
 if __name__ == "__main__":
     import sys
