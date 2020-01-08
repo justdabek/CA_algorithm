@@ -1,15 +1,16 @@
 
 
 class Cell:
-    def __init__(self,row,col,ID,nextID,colour):
+    def __init__(self,row,col,ID,nextID,color):
         self.row=row
         self.col=col
         self.ID=ID
         self.nextID=nextID
-        self.colour=colour
+        self.color=color
+        self.phase=0
 
     def __repr__(self):
-        return f'{self.ID}'
+        return f'{self.row};{self.col};{self.ID};{self.colour};{self.phase}'
 
     def setID(self,ID):
         self.ID=ID
@@ -20,8 +21,14 @@ class Cell:
     def getID(self):
         return self.ID
 
-    def setColour(self,colour):
-        self.colour=colour
+    def setColor(self,color):
+        self.color=color
+
+    def getColor(self):
+        return self.color
+
+    def setPhase(self, phase):
+        self.phase=phase
 
     def update(self):
         self.ID=self.nextID

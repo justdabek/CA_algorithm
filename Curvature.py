@@ -1,54 +1,49 @@
 import random
 
 def Rule1(IDList):
-    mainCellID=IDList[4]
-
-    if(IDList.count(mainCellID)>=5):
-        return True
+    ID=calculateID(IDList)
+    if(IDList.count(ID)>=5):
+        return ID
     else:
         return False
 
 def Rule2(IDList):
-    mainCellID=IDList[4]
-
-    NearestNeighborsList=[IDList[1],IDList[3],IDList[5],IDList[7]]
-
-    if(NearestNeighborsList.count(mainCellID)>=3):
-        return True
+    NearestNeighborsList=[IDList[1],IDList[3],IDList[4],IDList[6]]
+    ID=calculateID(NearestNeighborsList)
+    if(NearestNeighborsList.count(ID)>=3):
+        return ID
     else:
         return False
 
 def Rule3(IDList):
-    mainCellID=IDList[4]
-
-    FurtherNeighborsList=[IDList[0],IDList[2],IDList[6],IDList[8]]
-
-    if(FurtherNeighborsList.count(mainCellID)>=3):
-        return True
+    FurtherNeighborsList=[IDList[0],IDList[2],IDList[5],IDList[7]]
+    ID=calculateID(FurtherNeighborsList)
+    if(FurtherNeighborsList.count(ID)>=3):
+        return ID
     else:
         return False
 
 def Rule4(IDList,probability):
-    mainCellID=IDList[4]
-    n=random.randrange(0, 100, 1, int)
+    n=random.randrange(1, 100, 1, int)
 
     if(n<=probability):
-        return calculateID(IDList,mainCellID)
+        return calculateID(IDList)
     else:
         return False
 
-def calculateID(IDList,cellID):
+def calculateID(id_list):
     NO_CELL = 0
     set_id = 0
     most_frequent = 0
-    unique_vals = set(IDList)
-    if len(IDList) > 0:
+    unique_vals = set(id_list)
+    if len(id_list) > 0:
         for val in unique_vals:
-            if val != NO_CELL and val!=1:
-                frequence = IDList.count(val)
+            if val != NO_CELL and val != 1:
+                frequence = id_list.count(val)
+                #print(frequence)
                 if frequence == most_frequent:
-                    set_id = cellID
+                    set_id = random.choice([set_id, val])           #if there is the same frequence of 2 IDs choice one
                 elif frequence > most_frequent:
                     most_frequent = frequence
-                    set_id = val
+                    set_id = val                                    #set the most frequent ID
     return set_id

@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'CA_GUI.ui'
@@ -10,24 +11,28 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QTimer
 from Image import *
+from PyQt5.QtGui import QImage, QColor
+
 from Board import *
 
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(557, 707)
+        MainWindow.resize(547, 778)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
+        self.img_png = QImage("CA_img.png")
         self.Image = QtWidgets.QLabel(self.centralwidget)
-        self.Image.setGeometry(QtCore.QRect(50, 10, 431, 431))
+        self.Image.setGeometry(QtCore.QRect(50, 10, 430, 430))
         self.Image.setText("")
         self.Image.setPixmap(QtGui.QPixmap("CA_img.png"))
         self.Image.setScaledContents(True)
         self.Image.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         self.Image.setWordWrap(False)
         self.Image.setObjectName("Image")
+        self.Image.mousePressEvent = self.onclick
 
         self.horizontalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(20, 460, 501, 41))
@@ -151,7 +156,7 @@ class Ui_MainWindow(object):
         self.Max.setObjectName("Max")
 
         self.Generate = QtWidgets.QPushButton(self.centralwidget)
-        self.Generate.setGeometry(QtCore.QRect(320, 620, 201, 51))
+        self.Generate.setGeometry(QtCore.QRect(310, 690, 201, 51))
         self.Generate.setObjectName("Generate")
         self.Generate.clicked.connect(self.generate)
 
@@ -189,6 +194,48 @@ class Ui_MainWindow(object):
         self.GBC.setGeometry(QtCore.QRect(10, 30, 70, 17))
         self.GBC.setObjectName("checkBox")
         self.GBC.stateChanged.connect(self.GBCstate)
+
+        self.frame_5 = QtWidgets.QFrame(self.centralwidget)
+        self.frame_5.setGeometry(QtCore.QRect(310, 610, 211, 71))
+        self.frame_5.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_5.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_5.setObjectName("frame_5")
+
+        self.GetBoundries = QtWidgets.QPushButton(self.frame_5)
+        self.GetBoundries.setGeometry(QtCore.QRect(10, 0, 91, 23))
+        self.GetBoundries.setObjectName("GetBoundries")
+        self.boundry_length = QtWidgets.QLabel(self.frame_5)
+        self.boundry_length.setGeometry(QtCore.QRect(20, 30, 47, 13))
+        self.boundry_length.setObjectName("boundry_length")
+        self.mean_size = QtWidgets.QLabel(self.frame_5)
+        self.mean_size.setGeometry(QtCore.QRect(20, 50, 121, 16))
+        self.mean_size.setObjectName("mean_size")
+
+        self.boundry_length_value = QtWidgets.QLabel(self.frame_5)
+        self.boundry_length_value.setGeometry(QtCore.QRect(70, 30, 47, 13))
+        self.boundry_length_value.setText("")
+        self.boundry_length_value.setObjectName("boundry_length_value")
+
+        self.mean_size_value = QtWidgets.QLabel(self.frame_5)
+        self.mean_size_value.setGeometry(QtCore.QRect(130, 50, 47, 13))
+        self.mean_size_value.setText("")
+        self.mean_size_value.setObjectName("mean_size_value")
+
+        self.frame_6 = QtWidgets.QFrame(self.centralwidget)
+        self.frame_6.setGeometry(QtCore.QRect(20, 680, 281, 71))
+        self.frame_6.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_6.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_6.setObjectName("frame_6")
+        self.Substructures = QtWidgets.QPushButton(self.frame_6)
+        self.Substructures.setGeometry(QtCore.QRect(10, 10, 75, 23))
+        self.Substructures.setObjectName("Substructures")
+        self.Substructures.clicked.connect(self.substructures)
+        self.DualPhase = QtWidgets.QPushButton(self.frame_6)
+        self.DualPhase.setGeometry(QtCore.QRect(10, 40, 75, 23))
+        self.DualPhase.setObjectName("DualPhase")
+        self.Delete = QtWidgets.QCheckBox(self.frame_6)
+        self.Delete.setGeometry(QtCore.QRect(110, 10, 70, 17))
+        self.Delete.setObjectName("Delete")
 
         self.timer=QTimer()
         self.timer.setInterval(100)
@@ -233,6 +280,7 @@ class Ui_MainWindow(object):
         self.Probability.setText(_translate("MainWindow", "Probability"))
 
 
+
         self.Inclusions.setText(_translate("MainWindow", "Inclusions - radius"))
         self.Min_edit.setText(_translate("MainWindow", "1"))
         self.Max_edit.setText(_translate("MainWindow", "10"))
@@ -243,6 +291,13 @@ class Ui_MainWindow(object):
         self.Generate.setText(_translate("MainWindow", "Generate"))
         self.Import.setText(_translate("MainWindow", "Import"))
         self.Export.setText(_translate("MainWindow", "Export"))
+        self.Probability_edit.setText(_translate("MainWindow", "50"))
+        self.GetBoundries.setText(_translate("MainWindow", "Get boundaries"))
+        self.boundry_length.setText(_translate("MainWindow", "Length:"))
+        self.mean_size.setText(_translate("MainWindow", "Mean size of the grain:"))
+        self.Substructures.setText(_translate("MainWindow", "Substructures"))
+        self.DualPhase.setText(_translate("MainWindow", "Dual-Phase"))
+        self.Delete.setText(_translate("MainWindow", "Delete"))
 
     def next(self):
         print("next")
@@ -286,6 +341,7 @@ class Ui_MainWindow(object):
         elif "PENTAGONAL RIGHT" == temp:
             return PENTAGONAL_RIGHT
 
+
     def generate(self):
         nrOfSeeds=self.Seeds_edit.text()
         X=self.X_edit.text()
@@ -306,7 +362,10 @@ class Ui_MainWindow(object):
             self.board.setCurvature(False, 0)
 
         self.refresh()
-        # self.reset()
+
+    def substructures(self):
+        self.board.addSeeds(int(self.Seeds_edit.text()))
+        self.refresh()
 
     def exportCSV(self):
         self.board.writeToCSV()
@@ -326,6 +385,19 @@ class Ui_MainWindow(object):
         else:
             self.comboBox.setEnabled(True)
 
+    def onclick(self,event):
+        print('you pressed', event.pos().x(), event.pos().y())
+        x=event.pos().x()*self.board.dimX/430
+        y=event.pos().y()*self.board.dimY/430
+        self.img_png = QImage("CA_img.png")
+        c=self.img_png.pixel(int(x),int(y))
+        c_rgb = QColor(c).getRgb()
+
+        if (self.Delete.isChecked()):
+            self.board.removeSeed(c_rgb[:3])
+            self.refresh()
+        else:
+            pass
 
 if __name__ == "__main__":
     import sys
@@ -335,5 +407,3 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
-
-#
