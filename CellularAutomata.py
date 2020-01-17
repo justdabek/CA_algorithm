@@ -22,6 +22,7 @@ class Ui_MainWindow(object):
         MainWindow.resize(547, 778)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        self.phase=0
 
         self.img_png = QImage("CA_img.png")
         self.Image = QtWidgets.QLabel(self.centralwidget)
@@ -66,12 +67,12 @@ class Ui_MainWindow(object):
         self.X_edit = QtWidgets.QLineEdit(self.Dimensions)
         self.X_edit.setGeometry(QtCore.QRect(20, 20, 51, 20))
         self.X_edit.setObjectName("X_edit")
-        self.X_edit.setText('200')
+        self.X_edit.setText('100')
 
         self.Y_edit = QtWidgets.QLineEdit(self.Dimensions)
         self.Y_edit.setGeometry(QtCore.QRect(20, 50, 51, 20))
         self.Y_edit.setObjectName("Y_edit")
-        self.Y_edit.setText('200')
+        self.Y_edit.setText('100')
 
         self.X = QtWidgets.QLabel(self.Dimensions)
         self.X.setGeometry(QtCore.QRect(10, 20, 16, 16))
@@ -97,7 +98,7 @@ class Ui_MainWindow(object):
         self.Seeds_edit = QtWidgets.QLineEdit(self.frame)
         self.Seeds_edit.setGeometry(QtCore.QRect(10, 20, 51, 20))
         self.Seeds_edit.setObjectName("Seeds_edit")
-        self.Seeds_edit.setText('10')
+        self.Seeds_edit.setText('30')
 
         self.NrOfInclusions = QtWidgets.QLabel(self.frame)
         self.NrOfInclusions.setGeometry(QtCore.QRect(10, 40, 101, 16))
@@ -204,6 +205,7 @@ class Ui_MainWindow(object):
         self.GetBoundries = QtWidgets.QPushButton(self.frame_5)
         self.GetBoundries.setGeometry(QtCore.QRect(10, 0, 91, 23))
         self.GetBoundries.setObjectName("GetBoundries")
+        self.GetBoundries.clicked.connect(self.getBoundries)
         self.boundry_length = QtWidgets.QLabel(self.frame_5)
         self.boundry_length.setGeometry(QtCore.QRect(20, 30, 47, 13))
         self.boundry_length.setObjectName("boundry_length")
@@ -217,7 +219,7 @@ class Ui_MainWindow(object):
         self.boundry_length_value.setObjectName("boundry_length_value")
 
         self.mean_size_value = QtWidgets.QLabel(self.frame_5)
-        self.mean_size_value.setGeometry(QtCore.QRect(130, 50, 47, 13))
+        self.mean_size_value.setGeometry(QtCore.QRect(140, 50, 51, 16))
         self.mean_size_value.setText("")
         self.mean_size_value.setObjectName("mean_size_value")
 
@@ -233,13 +235,23 @@ class Ui_MainWindow(object):
         self.DualPhase = QtWidgets.QPushButton(self.frame_6)
         self.DualPhase.setGeometry(QtCore.QRect(10, 40, 75, 23))
         self.DualPhase.setObjectName("DualPhase")
+        self.DualPhase.clicked.connect(self.dualPhase)
         self.Delete = QtWidgets.QCheckBox(self.frame_6)
         self.Delete.setGeometry(QtCore.QRect(110, 10, 70, 17))
         self.Delete.setObjectName("Delete")
+        self.phase_label = QtWidgets.QLabel(self.frame_6)
+        self.phase_label.setGeometry(QtCore.QRect(110, 40, 47, 13))
+        self.phase_label.setObjectName("phase_label")
+        self.phase_label_disp = QtWidgets.QLabel(self.frame_6)
+        self.phase_label_disp.setGeometry(QtCore.QRect(150, 40, 47, 13))
+        self.phase_label_disp.setObjectName("phase_label_disp")
+
 
         self.timer=QTimer()
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.playstep)
+
+
 
 
         MainWindow.setCentralWidget(self.centralwidget)
@@ -261,14 +273,14 @@ class Ui_MainWindow(object):
         self.Next.setText(_translate("MainWindow", "Next"))
         self.Reset.setText(_translate("MainWindow", "Reset"))
         self.X.setText(_translate("MainWindow", "X"))
-        self.X_edit.setText(_translate("MainWindow","200"))
+        self.X_edit.setText(_translate("MainWindow","250"))
         self.Y.setText(_translate("MainWindow", "Y"))
-        self.Y_edit.setText(_translate("MainWindow","200"))
+        self.Y_edit.setText(_translate("MainWindow","250"))
         self.Dimensions_2.setText(_translate("MainWindow", "Dimensions"))
         self.NrOfSeeds.setText(_translate("MainWindow", "Number of seeds"))
-        self.Seeds_edit.setText(_translate("MainWindow","100"))
+        self.Seeds_edit.setText(_translate("MainWindow","200"))
         self.NrOfInclusions.setText(_translate("MainWindow", "Number of inclusions"))
-        self.Inclusions_edit.setText(_translate("MainWindow","20"))
+        self.Inclusions_edit.setText(_translate("MainWindow","0"))
         self.Method.setText(_translate("MainWindow", "Method"))
         self.comboBox.setItemText(0, _translate("MainWindow", "MOORE"))
         self.comboBox.setItemText(1, _translate("MainWindow", "VON NEUMANN"))
@@ -298,6 +310,9 @@ class Ui_MainWindow(object):
         self.Substructures.setText(_translate("MainWindow", "Substructures"))
         self.DualPhase.setText(_translate("MainWindow", "Dual-Phase"))
         self.Delete.setText(_translate("MainWindow", "Delete"))
+        self.phase_label.setText(_translate("MainWindow", "Phase:"))
+        self.phase_label_disp.setText(_translate("MainWindow", " "))
+
 
     def next(self):
         print("next")
@@ -320,9 +335,9 @@ class Ui_MainWindow(object):
         img = Image.new('RGB', (100, 100))
         pixels = img.load()
 
-        for j in range(0, 100):
-            for i in range(0, 100):
-                pixels[i, j] = colour_rule[0]
+        for i in range(0, 100):
+            for j in range(0, 100):
+                pixels[i, j] = color_rule[0]
         img.save('CA_img.png')
         self.Image.setPixmap(QtGui.QPixmap("CA_img.png"))
 
@@ -343,6 +358,8 @@ class Ui_MainWindow(object):
 
 
     def generate(self):
+        self.phase=0
+        self.phase_label_disp.setText(str(self.phase))
         nrOfSeeds=self.Seeds_edit.text()
         X=self.X_edit.text()
         Y=self.Y_edit.text()
@@ -364,7 +381,13 @@ class Ui_MainWindow(object):
         self.refresh()
 
     def substructures(self):
-        self.board.addSeeds(int(self.Seeds_edit.text()))
+        self.board.addSeeds(int(self.Seeds_edit.text()),0)
+        self.refresh()
+
+    def dualPhase(self):
+        self.phase+=1
+        self.board.addSeeds(int(self.Seeds_edit.text()),self.phase)
+        self.phase_label_disp.setText(str(self.phase))
         self.refresh()
 
     def exportCSV(self):
@@ -385,6 +408,14 @@ class Ui_MainWindow(object):
         else:
             self.comboBox.setEnabled(True)
 
+    def getBoundries(self):
+        length=self.board.markBoundries()
+        size=int(self.board.dimX*self.board.dimY/self.board.seeds)
+        self.boundry_length_value.setText(str(length))
+        self.mean_size_value.setText(str(size))
+        self.refresh()
+
+
     def onclick(self,event):
         print('you pressed', event.pos().x(), event.pos().y())
         x=event.pos().x()*self.board.dimX/430
@@ -392,7 +423,6 @@ class Ui_MainWindow(object):
         self.img_png = QImage("CA_img.png")
         c=self.img_png.pixel(int(x),int(y))
         c_rgb = QColor(c).getRgb()
-
         if (self.Delete.isChecked()):
             self.board.removeSeed(c_rgb[:3])
             self.refresh()
